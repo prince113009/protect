@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Please wait</title>
+</head>
+<body>
+
+<h3>Please wait…</h3>
+<button onclick="go()">Continue</button>
+
+<script>
+function block() {
+  location.replace("/chala-jaa-bsdk.html");
+}
+
+/* ========= CHROME ONLY (BRAVE BLOCK) ========= */
+(function () {
+  const ua = navigator.userAgent.toLowerCase();
+  const isAndroid = ua.includes("android");
+
+  if (navigator.brave || ua.includes("brave")) block();
+
+  const isChrome =
+    ua.includes("chrome") &&
+    !ua.includes("edg") &&
+    !ua.includes("opr") &&
+    !ua.includes("vivaldi") &&
+    !ua.includes("duckduckgo");
+
+  if (!isChrome) block();
+  if (!isAndroid && navigator.plugins.length === 0) block();
+})();
+
+/* ========= IFRAME BLOCK ========= */
+if (top !== self) block();
+
+/* ========= DEVTOOLS (SAFE) ========= */
+setInterval(() => {
+  const t = performance.now();
+  debugger;
+  if (performance.now() - t > 300) block();
+}, 1200);
+
+/* ========= BOT ========= */
+if (navigator.webdriver || !navigator.languages) block();
+
+/* ========= TIMER ========= */
+const s = Date.now();
+setTimeout(() => {
+  if (Date.now() - s < 3500) block();
+  sessionStorage.setItem("ok", "1");
+}, 3500);
+
+/* ========= STEP ========= */
+if (sessionStorage.getItem("entered")) {
+  if (!sessionStorage.getItem("ok")) block();
+} else {
+  sessionStorage.setItem("entered", "1");
+}
+
+/* ========= FINAL ========= */
+function go() {
+  fetch("/api/go", { method: "POST" })
+    .then(r => r.redirected ? location.href = r.url : block())
+    .catch(block);
+}
+</script>
+
+</body>
+</html>
